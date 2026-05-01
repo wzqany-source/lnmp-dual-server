@@ -1,12 +1,11 @@
 #!/bin/bash
-#============================================
-#项目：Linux 自动巡检系统
-#版本：v3.0
-#作者：yuwei
-#更新：2026-03
-#功能：服务状态 + 资源监控 + 日志归档
-#============================================
-set -e
+
+# Author: yuwei
+# Description: 检查nginx/mysql/内存/磁盘/cpu/apache/情况以及压缩七天的日志
+# Version: v3.0
+# Usage: 直接执行 bash check_services_v3.sh 定时执行:0 8,20 * * */bin/bash 每天8点和20点自动执行
+
+set -euo pipefail
 
 TIME=$(/usr/bin/date +%Y%m%d_%H%M%S)
 log=~/logs/check_${TIME}.log
@@ -29,17 +28,17 @@ fi
  function check_disk() {
     disk=$(/usr/bin/df -h / | awk 'NR==2 {print $5}' | tr -d '%')
     echo "磁盘使用率：${disk}%"
-    if [ $disk -gt 80 ]; then
+    if [ "$disk" -gt 80 ]; then
         echo "警告磁盘使用率超过80%"
     else
        echo "[ok]磁盘使用率正常"
 fi
 }
 
-function check_men() {
-    men=$(/usr/bin/free -m | awk 'NR==2 {print $4}')
-    echo "剩余内存:${men}mb"
-    if [ $men -lt 200 ]; then
+function check_mem() {
+    mem=$(/usr/bin/free -m | awk 'NR==2 {print $4}')
+    echo "剩余内存:${mem}mb"
+    if [ "$mem" -lt 200 ]; then
        echo "内存不足200mb"
     else
        echo "内存足够"
@@ -63,16 +62,16 @@ function check_cpu(){
 
   function check_apache(){
 	if /usr/bin/systemctl is-active --quiet http || /usr/bin/systemctl is-active --quiet apache2; then
-		echo "[ok]apache正常运行" | tee -a $log
+		echo "[ok]apache正常运行" | tee -a "$log"
 	else
-		echo "[on]apache没有运行" | tee -a $log
+		echo "[on]apache没有运行" | tee -a "$log"
 	fi
 }
 
- function archive_logs(){
+ function backup_logs(){
 	#查找7天前的日志文件并压缩归档
 	find /home/yuwei/logs -name "*.log" -mtime +7 -exec gzip {} \;
-	echo "[ok]7天前的日志已压缩归档" | tee -a $log
+	echo "[ok]7天前的日志已压缩归档" | tee -a "$log"
 }
 
 
@@ -89,15 +88,15 @@ check_mysql
 echo "------------------------------------"
 check_disk
 echo "----------------------------"
-check_men
+check_mem
 echo "-----------------------"
 check_cpu
 echo "---------------------------"
 check_apache
 echo "------------------------------------"
-archive_logs
+backup_logs
 echo "-------------------------------------"
-} | tee -a $log
+} | tee -a "$log"
 
 
 

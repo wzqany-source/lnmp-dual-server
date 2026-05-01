@@ -10,14 +10,12 @@ KEEP_DAYS=7
 
 function backup_db() {
 	echo "开始创建备份文件"
-	mkdir -p ${BACKUP_DIR}
+	mkdir -p "${BACKUP_DIR}"
 
 	#执行备份命令
-/usr/bin/mysqldump -u${DB_USER} -p${DB_PASS} ${DB_NAME} > ${BACKUP_DIR}/${DB_NAME}_${DATE}.sql
-
-	if [ $? -eq 0 ]; then
+if /usr/bin/mysqldump -u${DB_USER} -p${DB_PASS} ${DB_NAME} > "${BACKUP_DIR}/${DB_NAME}_${DATE}.sql" ;then
    echo "[$(date +'%T')]备份成功：${DB_NAME}_${DATE}.sql"
-   return 0
+  return 0
 	else
   echo "[$(date +'%T')]备份失败：请检查数据库权限和状态"
   return 1

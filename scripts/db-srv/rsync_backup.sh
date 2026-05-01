@@ -17,14 +17,11 @@ LOG_FILE="/home/yuwei/logs/rsync/rsync_push_${DATE}.log"
 mkdir -p /home/yuwei/logs/
 
 # 3. 执行 rsync 同步并记录日志
-echo "--- 备份同步开始: $(date '+%Y-%m-%d %H:%M:%S') ---" >> $LOG_FILE
-rsync -avz $SOURCE_DIR $REMOTE_USER@$REMOTE_IP:$REMOTE_DIR >> $LOG_FILE 2>&1
-
-# 4. 检查结果
-if [ $? -eq 0 ]; then
-    echo "状态: [OK] 同步成功" >> $LOG_FILE
+echo "--- 备份同步开始: $(date '+%Y-%m-%d %H:%M:%S') ---" >> "$LOG_FILE"
+if rsync -avz $SOURCE_DIR $REMOTE_USER@$REMOTE_IP:$REMOTE_DIR >> "$LOG_FILE" 2>&1; then
+    echo "状态: [OK] 同步成功" >> "$LOG_FILE"
 else
-    echo "状态: [ERROR] 同步失败，请检查网络或SSH密钥" >> $LOG_FILE
+    echo "状态: [ERROR] 同步失败，请检查网络或SSH密钥" >> "$LOG_FILE"
 fi
-echo "--- 备份同步结束 ---" >> $LOG_FILE
-echo "" >> $LOG_FILE
+echo "--- 备份同步结束 ---" >> "$LOG_FILE"
+echo "" >> "$LOG_FILE"
